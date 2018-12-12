@@ -26,11 +26,16 @@ var budgetController = (function () {
         }
     };
 
+
     return {
         addItem: function (type, des, val) {
             var newItem, ID;
 
-            // Create New ID
+            //[1 2 3 4 5], next ID = 6
+            //[1 2 4 6 8], next ID = 9
+            // ID = last ID + 1
+
+            // Create new ID
             if (data.allItems[type].length > 0) {
                 ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
             } else {
@@ -44,7 +49,7 @@ var budgetController = (function () {
                 newItem = new Income(ID, des, val);
             }
 
-            // Push It into our data structure
+            // Push it into our data structure
             data.allItems[type].push(newItem);
 
             // Return the new element
@@ -56,8 +61,10 @@ var budgetController = (function () {
         }
     };
 
-
 })();
+
+
+
 
 // UI CONTROLLER
 var UIController = (function () {
@@ -73,48 +80,65 @@ var UIController = (function () {
 
     return {
         getInput: function () {
-
             return {
                 type: document.querySelector(DOMstrings.inputType).value, // Will be either inc or exp
                 description: document.querySelector(DOMstrings.inputDescription).value,
-                value: document.querySelector(DOMstrings.inputValue).value
+                value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
             };
         },
 
+
         addListItem: function (obj, type) {
             var html, newHtml, element;
-            // Create HTML string with plachholder text
+            // Create HTML string with placeholder text
 
             if (type === 'inc') {
                 element = DOMstrings.incomeContainer;
-                html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+
+                html = '<div class="item clearfix" id="inc-%id%"> <div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             } else if (type === 'exp') {
                 element = DOMstrings.expensesContainer;
-                html = '<div class="item clearfix" id="expense-%id%"><div class="item__description">%%description</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+
+                html = '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
             }
-            // repalce the placeholder text with some actual data
-            console.log(obj);
+
+            // Replace the placeholder text with some actual data
             newHtml = html.replace('%id%', obj.id);
             newHtml = newHtml.replace('%description%', obj.description);
             newHtml = newHtml.replace('%value%', obj.value);
 
-
             // Insert the HTML into the DOM
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
-
-
         },
+
+        clearfields: function () {
+            var fields, fieldsArr;
+
+            fields = document.querySelectorAll(DOMstrings.inputDescription + ',' + DOMstrings.inputValue);
+
+            fieldsArr = Array.prototype.slice.call(fields);
+
+            fieldsArr.forEach(function (current, index, array) {
+                current.value = "";
+            });
+
+            fieldsArr[0].focus();
+        },
+
 
         getDOMstrings: function () {
             return DOMstrings;
         }
-
     };
 
 })();
 
+
+
+
 // GLOBAL APP CONTROLLER
 var controller = (function (budgetCtrl, UICtrl) {
+
     var setupEventListeners = function () {
         var DOM = UICtrl.getDOMstrings();
 
@@ -125,8 +149,17 @@ var controller = (function (budgetCtrl, UICtrl) {
                 ctrlAddItem();
             }
         });
-    }
 
+    };
+
+    var updateBudget = function () {
+
+        // 1. Calculate and update budget
+
+        // 2. return the budget
+
+        // 3. Display the budget on the UI
+    };
 
     var ctrlAddItem = function () {
         var input, newItem;
@@ -135,24 +168,25 @@ var controller = (function (budgetCtrl, UICtrl) {
         input = UICtrl.getInput();
 
 
-        // 2. add the item to the budget controller
-        newwItem = budgetCtrl.addItem(input.type, input.description, input.value)
+        // 2. Add the item to the budget controller
+        newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
-        // 3. Add the item to the Ui
+        // 3. Add the item to the UI
         UICtrl.addListItem(newItem, input.type);
 
-        // 4. Display the budget on the UI
+        // 4. Clear the fields
+        UICtrl.clearfields();
 
-    }
+    };
 
     return {
         init: function () {
-            console.log('app started')
+            console.log('Application has started.');
             setupEventListeners();
         }
-    }
-
+    };
 
 })(budgetController, UIController);
+
 
 controller.init();
